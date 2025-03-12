@@ -6,6 +6,7 @@ import com.pykost.exception.DAOException;
 import com.pykost.util.ConnectionManager;
 
 import java.sql.*;
+import java.util.List;
 import java.util.Optional;
 
 public class AuthorDAO implements DAO<Author, Long> {
@@ -42,8 +43,8 @@ public class AuthorDAO implements DAO<Author, Long> {
 
     @Override
     public boolean delete(Long id) {
-        try (Connection connection = ConnectionManager.get()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL);
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -53,15 +54,17 @@ public class AuthorDAO implements DAO<Author, Long> {
 
     @Override
     public Author save(Author author) {
-        try (Connection connection = ConnectionManager.get()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS);
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement preparedStatement =
+                     connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, author.getName());
             preparedStatement.executeUpdate();
-            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                author.setId(generatedKeys.getLong("id"));
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    author.setId(generatedKeys.getLong("id"));
+                }
+                return author;
             }
-            return author;
         } catch (SQLException e) {
             throw new DAOException(e);
         }
@@ -69,8 +72,8 @@ public class AuthorDAO implements DAO<Author, Long> {
 
     @Override
     public void update(Author author) {
-        try (Connection connection = ConnectionManager.get()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL);
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
             preparedStatement.setString(1, author.getName());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -80,18 +83,41 @@ public class AuthorDAO implements DAO<Author, Long> {
 
     @Override
     public Optional<Author> findById(Long id) {
-        try (Connection connection = ConnectionManager.get()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL);
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            Author author = null;
-            if (resultSet.next()) {
-                author = new Author(
-                        resultSet.getLong("id"),
-                        resultSet.getString("name")
-                );
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                Author author = null;
+                if (resultSet.next()) {
+                    author = new Author(
+                            resultSet.getLong("id"),
+                            resultSet.getString("name")
+                    );
+                }
+                return Optional.ofNullable(author);
             }
-            return Optional.ofNullable(author);
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
+    }
+
+    public Optional<Author> findByIdAllBooks(Long id) {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            preparedStatement.setLong(1, id);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                Author author = null;
+                if (resultSet.next()) {
+                    author = new Author(
+                            resultSet.getLong("id"),
+                            resultSet.getString("name")
+                    );
+                    BookDAO bookDAO = BookDAO.getInstance();
+                    List<Book> byAuthor = bookDAO.findAllBooksByAuthor(id);
+                    author.setBooks(byAuthor);
+                }
+                return Optional.ofNullable(author);
+            }
         } catch (SQLException e) {
             throw new DAOException(e);
         }

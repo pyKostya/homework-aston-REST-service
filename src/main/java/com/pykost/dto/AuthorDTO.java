@@ -1,20 +1,15 @@
-package com.pykost.entity;
+package com.pykost.dto;
+
+
+import com.pykost.entity.Book;
 
 import java.util.List;
 
-public class Author {
+public class AuthorDTO {
     private Long id;
     private String name;
-
     private List<Book> books;
 
-    public Author() {
-    }
-
-    public Author(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     public Long getId() {
         return id;
@@ -40,12 +35,10 @@ public class Author {
         this.books = books;
     }
 
-    @Override
-    public String toString() {
-        return "Author{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", books=" + books +
-               '}';
-    }
 }
+
+
+
+
+
+

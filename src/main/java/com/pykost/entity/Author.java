@@ -1,19 +1,15 @@
 package com.pykost.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Author {
     private Long id;
     private String name;
-
     private List<Book> books;
 
     public Author() {
-    }
-
-    public Author(Long id, String name) {
-        this.id = id;
-        this.name = name;
+        books = new ArrayList<>();
     }
 
     public Long getId() {
@@ -40,12 +36,4 @@ public class Author {
         this.books = books;
     }
 
-    @Override
-    public String toString() {
-        return "Author{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", books=" + books +
-               '}';
-    }
 }

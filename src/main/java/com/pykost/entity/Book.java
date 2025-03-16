@@ -6,16 +6,6 @@ public class Book {
     private String description;
     private Author author;
 
-    public Book() {
-    }
-
-    public Book(Long id, String name, String description, Author author) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.author = author;
-    }
-
     public Long getId() {
         return id;
     }
@@ -48,13 +38,4 @@ public class Book {
         this.author = author;
     }
 
-    @Override
-    public String toString() {
-        return "Book{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", description='" + description + '\'' +
-               ", author=" + author +
-               '}';
-    }
 }

@@ -1,12 +1,11 @@
 package com.pykost.dto;
 
-import com.pykost.entity.Author;
 
 public class BookDTO {
     private Long id;
     private String name;
     private String description;
-    private Author author;
+    private Long authorId;
 
     public Long getId() {
         return id;
@@ -32,11 +31,11 @@ public class BookDTO {
         this.description = description;
     }
 
-    public Author getAuthor() {
-        return author;
+    public Long getAuthorId() {
+        return authorId;
     }
 
-    public void setAuthor(Author author) {
-        this.author = author;
+    public void setAuthorId(Long authorId) {
+        this.authorId = authorId;
     }
 }

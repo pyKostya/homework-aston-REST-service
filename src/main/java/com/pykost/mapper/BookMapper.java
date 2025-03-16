@@ -10,10 +10,9 @@ import org.mapstruct.factory.Mappers;
 public interface BookMapper {
     BookMapper INSTANCE = Mappers.getMapper(BookMapper.class);
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "name", target = "name")
-    @Mapping(source = "description", target = "description")
-    Book toEntity(BookDTO bookDTO);
-
+    @Mapping(source = "author.id", target = "authorId")
     BookDTO toDTO(Book book);
+
+    @Mapping(source = "authorId", target = "author.id")
+    Book toEntity(BookDTO bookDTO);
 }

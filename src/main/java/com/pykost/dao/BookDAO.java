@@ -4,46 +4,17 @@ import com.pykost.entity.Book;
 import com.pykost.exception.DAOException;
 import com.pykost.util.ConnectionManager;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BookDAO implements DAO<Book, Long> {
+public class BookDAO implements DAO<Book, Long>, Serializable {
+    @Serial
+    private static final long serialVersionUID = 879342512444L;
     private static final BookDAO INSTANCE = new BookDAO();
-    private static final String DELETE_SQL = """
-            DELETE FROM book
-            WHERE id = ?
-            """;
-    private static final String SAVE_SQL = """
-            INSERT INTO book(name, description, author_id)
-            VALUES (?,?,?)
-            """;
-
-    private static final String UPDATE_SQL = """
-            UPDATE book
-            SET name = ?,
-            description = ?,
-            author_id = ?
-            WHERE id = ?
-            """;
-
-    private static final String FIND_ALL_BOOKS_BY_AUTHOR_SQL = """
-            SELECT id,
-                   name,
-                   description,
-                   author_id
-            FROM book
-            WHERE author_id = ?
-            """;
-    private static final String FIND_BY_ID_SQL = """
-            SELECT id,
-                   name,
-                   description,
-                   author_id
-                   FROM book
-            WHERE id = ?;
-            """;
 
     private BookDAO() {
     }
@@ -54,8 +25,9 @@ public class BookDAO implements DAO<Book, Long> {
 
     @Override
     public boolean delete(Long id) {
+        String deleteSql = "DELETE FROM book WHERE id = ?";
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(deleteSql)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -65,13 +37,15 @@ public class BookDAO implements DAO<Book, Long> {
 
     @Override
     public Book save(Book book) {
+        String saveSql = "INSERT INTO book(name, description, author_id) VALUES (?,?,?)";
         try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement preparedStatement =
-                     connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+                     connection.prepareStatement(saveSql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, book.getName());
             preparedStatement.setString(2, book.getDescription());
             preparedStatement.setLong(3, book.getAuthor().getId());
             preparedStatement.executeUpdate();
+
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     book.setId(generatedKeys.getLong("id"));
@@ -85,8 +59,9 @@ public class BookDAO implements DAO<Book, Long> {
 
     @Override
     public void update(Book book) {
+        String updateSql = "UPDATE book SET name = ?, description = ?, author_id = ? WHERE id = ?";
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
             preparedStatement.setString(1, book.getName());
             preparedStatement.setString(2, book.getDescription());
             preparedStatement.setLong(3, book.getAuthor().getId());
@@ -99,36 +74,32 @@ public class BookDAO implements DAO<Book, Long> {
 
     @Override
     public Optional<Book> findById(Long id) {
+        String findByIdSql = "SELECT * FROM book WHERE id = ?";
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(findByIdSql)) {
             preparedStatement.setLong(1, id);
+
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                Book book = null;
                 if (resultSet.next()) {
-                    book = new Book();
-                    book.setId(resultSet.getLong("id"));
-                    book.setName(resultSet.getString("name"));
-                    book.setDescription(resultSet.getString("description"));
+                    Book book = mapResultSetToBook(resultSet);
+                    return Optional.of(book);
                 }
-                return Optional.ofNullable(book);
             }
         } catch (SQLException e) {
             throw new DAOException(e);
         }
+        return Optional.empty();
     }
 
-    public List<Book> findAllBooksByAuthor(Long id) {
+    public List<Book> getAllBooks() {
+        String findAllBooksByAuthorSql = "SELECT * FROM book";
+        List<Book> books = new ArrayList<>();
         try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_BOOKS_BY_AUTHOR_SQL)) {
-            preparedStatement.setLong(1, id);
+             PreparedStatement preparedStatement = connection.prepareStatement(findAllBooksByAuthorSql)) {
+
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                List<Book> books = new ArrayList<>();
-                Book book;
                 while (resultSet.next()) {
-                    book = new Book();
-                    book.setId(resultSet.getLong("id"));
-                    book.setName(resultSet.getString("name"));
-                    book.setDescription(resultSet.getString("description"));
+                    Book book = mapResultSetToBook(resultSet);
                     books.add(book);
                 }
                 return books;
@@ -136,6 +107,18 @@ public class BookDAO implements DAO<Book, Long> {
         } catch (SQLException e) {
             throw new DAOException(e);
         }
+    }
+
+    private Book mapResultSetToBook(ResultSet resultSet) throws SQLException {
+        Book book = new Book();
+        book.setId(resultSet.getLong("id"));
+        book.setName(resultSet.getString("name"));
+        book.setDescription(resultSet.getString("description"));
+
+        AuthorDAO authorDAO = AuthorDAO.getInstance();
+        book.setAuthor(authorDAO.findById(resultSet.getLong("author_id")).orElse(null));
+
+        return book;
     }
 
 }

@@ -5,11 +5,14 @@ import com.pykost.dto.BookDTO;
 import com.pykost.entity.Book;
 import com.pykost.mapper.BookMapper;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public class BookServiceImpl implements Service<BookDTO, Long> {
+public class BookServiceImpl implements Service<BookDTO, Long>, Serializable {
+    @Serial
+    private static final long serialVersionUID = 89766546342L;
     private final BookDAO bookDAO = BookDAO.getInstance();
 
     @Override
@@ -30,14 +33,15 @@ public class BookServiceImpl implements Service<BookDTO, Long> {
     }
 
     @Override
-    public void update(BookDTO bookDTO) {
+    public void update(Long id, BookDTO bookDTO) {
         Book entity = BookMapper.INSTANCE.toEntity(bookDTO);
+        entity.setId(id);
         bookDAO.update(entity);
     }
 
-    public List<BookDTO> findByIdAllBooks(Long id) {
-        return bookDAO.findAllBooksByAuthor(id).stream()
+    public List<BookDTO> getAllBooks() {
+        return bookDAO.getAllBooks().stream()
                 .map(BookMapper.INSTANCE::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

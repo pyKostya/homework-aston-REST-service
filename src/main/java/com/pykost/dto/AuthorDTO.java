@@ -1,15 +1,12 @@
 package com.pykost.dto;
 
 
-import com.pykost.entity.Book;
-
 import java.util.List;
 
 public class AuthorDTO {
     private Long id;
     private String name;
-    private List<Book> books;
-
+    private List<BookDTO> books;
 
     public Long getId() {
         return id;
@@ -27,14 +24,13 @@ public class AuthorDTO {
         this.name = name;
     }
 
-    public List<Book> getBooks() {
+    public List<BookDTO> getBooks() {
         return books;
     }
 
-    public void setBooks(List<Book> books) {
+    public void setBooks(List<BookDTO> books) {
         this.books = books;
     }
-
 }
 
 

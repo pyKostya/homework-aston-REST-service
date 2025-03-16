@@ -5,9 +5,14 @@ import com.pykost.dto.AuthorDTO;
 import com.pykost.entity.Author;
 import com.pykost.mapper.AuthorMapper;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
-public class AuthorServiceImpl implements Service<AuthorDTO, Long> {
+public class AuthorServiceImpl implements Service<AuthorDTO, Long>, Serializable {
+    @Serial
+    private static final long serialVersionUID = 1345634634L;
     private final AuthorDAO authorDAO = AuthorDAO.getInstance();
 
     @Override
@@ -28,14 +33,17 @@ public class AuthorServiceImpl implements Service<AuthorDTO, Long> {
         return authorDAO.delete(id);
     }
 
-    public void update(AuthorDTO authorDTO) {
+    @Override
+    public void update(Long id, AuthorDTO authorDTO) {
         Author entity = AuthorMapper.INSTANCE.toEntity(authorDTO);
+        entity.setId(id);
         authorDAO.update(entity);
     }
 
-    public Optional<AuthorDTO> findByIdAllBooks(Long id) {
-        return authorDAO.findByIdAllBooks(id)
-                .map(AuthorMapper.INSTANCE::toDTO);
+    public List<AuthorDTO> getAllAuthors() {
+        return authorDAO.getAllAuthors().stream()
+                .map(AuthorMapper.INSTANCE::toDTO)
+                .toList();
     }
 
 }

@@ -3,31 +3,24 @@ package com.pykost.dao;
 import com.pykost.entity.Author;
 import com.pykost.entity.Book;
 import com.pykost.exception.DAOException;
-import com.pykost.util.ConnectionManager;
 
-import java.io.Serial;
-import java.io.Serializable;
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AuthorDAO implements DAO<Author, Long>, Serializable {
-    @Serial
-    private static final long serialVersionUID = 576484572456L;
-    private static final AuthorDAO INSTANCE = new AuthorDAO();
+public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
+    private final DataSource dataSource;
 
-    private AuthorDAO() {
-    }
-
-    public static AuthorDAO getInstance() {
-        return INSTANCE;
+    public AuthorDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
     public boolean delete(Long id) {
         String deleteSql = "DELETE FROM author WHERE id = ?";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(deleteSql)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
@@ -39,7 +32,7 @@ public class AuthorDAO implements DAO<Author, Long>, Serializable {
     @Override
     public Author save(Author author) {
         String saveSql = "INSERT INTO author(name) VALUES (?)";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement =
                      connection.prepareStatement(saveSql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, author.getName());
@@ -58,9 +51,10 @@ public class AuthorDAO implements DAO<Author, Long>, Serializable {
     @Override
     public void update(Author author) {
         String updateSql = "UPDATE author SET name = ? WHERE id = ?";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
             preparedStatement.setString(1, author.getName());
+            preparedStatement.setLong(2, author.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException(e);
@@ -70,7 +64,7 @@ public class AuthorDAO implements DAO<Author, Long>, Serializable {
     @Override
     public Optional<Author> findById(Long id) {
         String findByAuthorIdSql = "SELECT * FROM author WHERE id = ?";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findByAuthorIdSql)) {
 
             preparedStatement.setLong(1, id);
@@ -88,10 +82,11 @@ public class AuthorDAO implements DAO<Author, Long>, Serializable {
         return Optional.empty();
     }
 
-    public List<Author> getAllAuthors() {
+    @Override
+    public List<Author> getAllEntity() {
         String getAllAuthorSql = "SELECT * FROM author";
         List<Author> list = new ArrayList<>();
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(getAllAuthorSql)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -109,7 +104,7 @@ public class AuthorDAO implements DAO<Author, Long>, Serializable {
         String findByBookIdSql = "SELECT * FROM book WHERE author_id = ?";
         List<Book> books = new ArrayList<>();
 
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findByBookIdSql)) {
 
             preparedStatement.setLong(1, authorId);

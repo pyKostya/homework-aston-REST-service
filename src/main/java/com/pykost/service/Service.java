@@ -1,5 +1,6 @@
 package com.pykost.service;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface Service<E, K> {
@@ -10,5 +11,7 @@ public interface Service<E, K> {
     boolean delete(K k);
 
     void update(K k, E e);
+
+    List<E> getAll();
 
 }

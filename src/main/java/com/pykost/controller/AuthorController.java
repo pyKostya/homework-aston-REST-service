@@ -1,14 +1,19 @@
 package com.pykost.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pykost.dao.AuthorDAO;
 import com.pykost.dto.AuthorDTO;
+import com.pykost.mapper.AuthorMapper;
+import com.pykost.mapper.AuthorMapperImpl;
 import com.pykost.service.AuthorServiceImpl;
+import com.pykost.util.HikariCPDataSource;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -16,14 +21,18 @@ import java.util.Optional;
 @WebServlet("/author/*")
 public class AuthorController extends HttpServlet {
     private static final String CONTENT_TYPE = "application/json";
-    private final AuthorServiceImpl authorService = new AuthorServiceImpl();
+    DataSource dataSource = HikariCPDataSource.getDataSource();
+    private final AuthorDAO authorDAO = new AuthorDAO(dataSource);
+    private final AuthorMapper authorMapper = new AuthorMapperImpl();
+    private final AuthorServiceImpl authorService = new AuthorServiceImpl(authorDAO, authorMapper);
     private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
         if (pathInfo == null || pathInfo.equals("/")) {
-            List<AuthorDTO> allAuthors = authorService.getAllAuthors();
+            List<AuthorDTO> allAuthors = authorService.getAll();
 
             resp.setContentType(CONTENT_TYPE);
             resp.getWriter().write(objectMapper.writeValueAsString(allAuthors));

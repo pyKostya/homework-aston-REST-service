@@ -5,27 +5,29 @@ import com.pykost.dto.AuthorDTO;
 import com.pykost.entity.Author;
 import com.pykost.mapper.AuthorMapper;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public class AuthorServiceImpl implements Service<AuthorDTO, Long>, Serializable {
-    @Serial
-    private static final long serialVersionUID = 1345634634L;
-    private final AuthorDAO authorDAO = AuthorDAO.getInstance();
+public class AuthorServiceImpl implements Service<AuthorDTO, Long> {
+    private final AuthorDAO authorDAO;
+    private final AuthorMapper authorMapper;
+
+    public AuthorServiceImpl(AuthorDAO authorDAO, AuthorMapper authorMapper) {
+        this.authorDAO = authorDAO;
+        this.authorMapper = authorMapper;
+    }
 
     @Override
     public AuthorDTO create(AuthorDTO authorDTO) {
-        Author entity = AuthorMapper.INSTANCE.toEntity(authorDTO);
+        Author entity = authorMapper.toEntity(authorDTO);
         Author save = authorDAO.save(entity);
-        return AuthorMapper.INSTANCE.toDTO(save);
+        return authorMapper.toDTO(save);
     }
 
     @Override
     public Optional<AuthorDTO> getById(Long id) {
         return authorDAO.findById(id)
-                .map(AuthorMapper.INSTANCE::toDTO);
+                .map(authorMapper::toDTO);
     }
 
     @Override
@@ -35,14 +37,15 @@ public class AuthorServiceImpl implements Service<AuthorDTO, Long>, Serializable
 
     @Override
     public void update(Long id, AuthorDTO authorDTO) {
-        Author entity = AuthorMapper.INSTANCE.toEntity(authorDTO);
+        Author entity = authorMapper.toEntity(authorDTO);
         entity.setId(id);
         authorDAO.update(entity);
     }
 
-    public List<AuthorDTO> getAllAuthors() {
-        return authorDAO.getAllAuthors().stream()
-                .map(AuthorMapper.INSTANCE::toDTO)
+    @Override
+    public List<AuthorDTO> getAll() {
+        return authorDAO.getAllEntity().stream()
+                .map(authorMapper::toDTO)
                 .toList();
     }
 

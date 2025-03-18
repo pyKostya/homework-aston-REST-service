@@ -2,31 +2,27 @@ package com.pykost.dao;
 
 import com.pykost.entity.Book;
 import com.pykost.exception.DAOException;
-import com.pykost.util.ConnectionManager;
 
-import java.io.Serial;
-import java.io.Serializable;
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BookDAO implements DAO<Book, Long>, Serializable {
-    @Serial
-    private static final long serialVersionUID = 879342512444L;
-    private static final BookDAO INSTANCE = new BookDAO();
+public class BookDAO implements DAO<Book, Long>, GetAll<Book, Long> {
 
-    private BookDAO() {
-    }
+    private final DataSource dataSource;
+    private final AuthorDAO authorDAO;
 
-    public static BookDAO getInstance() {
-        return INSTANCE;
+    public BookDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
+        this.authorDAO = new AuthorDAO(dataSource);
     }
 
     @Override
     public boolean delete(Long id) {
         String deleteSql = "DELETE FROM book WHERE id = ?";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(deleteSql)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
@@ -38,7 +34,7 @@ public class BookDAO implements DAO<Book, Long>, Serializable {
     @Override
     public Book save(Book book) {
         String saveSql = "INSERT INTO book(name, description, author_id) VALUES (?,?,?)";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement =
                      connection.prepareStatement(saveSql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, book.getName());
@@ -60,7 +56,7 @@ public class BookDAO implements DAO<Book, Long>, Serializable {
     @Override
     public void update(Book book) {
         String updateSql = "UPDATE book SET name = ?, description = ?, author_id = ? WHERE id = ?";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
             preparedStatement.setString(1, book.getName());
             preparedStatement.setString(2, book.getDescription());
@@ -75,7 +71,7 @@ public class BookDAO implements DAO<Book, Long>, Serializable {
     @Override
     public Optional<Book> findById(Long id) {
         String findByIdSql = "SELECT * FROM book WHERE id = ?";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findByIdSql)) {
             preparedStatement.setLong(1, id);
 
@@ -91,10 +87,11 @@ public class BookDAO implements DAO<Book, Long>, Serializable {
         return Optional.empty();
     }
 
-    public List<Book> getAllBooks() {
+    @Override
+    public List<Book> getAllEntity() {
         String findAllBooksByAuthorSql = "SELECT * FROM book";
         List<Book> books = new ArrayList<>();
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findAllBooksByAuthorSql)) {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -115,7 +112,6 @@ public class BookDAO implements DAO<Book, Long>, Serializable {
         book.setName(resultSet.getString("name"));
         book.setDescription(resultSet.getString("description"));
 
-        AuthorDAO authorDAO = AuthorDAO.getInstance();
         book.setAuthor(authorDAO.findById(resultSet.getLong("author_id")).orElse(null));
 
         return book;

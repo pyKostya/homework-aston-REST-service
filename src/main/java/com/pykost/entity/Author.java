@@ -2,6 +2,7 @@ package com.pykost.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Author {
     private Long id;
@@ -9,7 +10,13 @@ public class Author {
     private List<Book> books;
 
     public Author() {
-        books = new ArrayList<>();
+        this.books = new ArrayList<>();
+    }
+
+    public Author(Long id, String name) {
+        this.id = id;
+        this.name = name;
+        this.books = new ArrayList<>();
     }
 
     public Long getId() {
@@ -36,4 +43,16 @@ public class Author {
         this.books = books;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Author author = (Author) o;
+        return Objects.equals(id, author.id) && Objects.equals(name, author.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
 }

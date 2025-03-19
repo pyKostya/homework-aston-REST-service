@@ -2,16 +2,16 @@ package com.pykost.entity;
 
 import java.util.Objects;
 
-public class Book {
+public class BookEntity {
     private Long id;
     private String name;
     private String description;
-    private Author author;
+    private AuthorEntity author;
 
-    public Book() {
+    public BookEntity() {
     }
 
-    public Book(Long id, String name, String description, Author author) {
+    public BookEntity(Long id, String name, String description, AuthorEntity author) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -42,11 +42,11 @@ public class Book {
         this.description = description;
     }
 
-    public Author getAuthor() {
+    public AuthorEntity getAuthor() {
         return author;
     }
 
-    public void setAuthor(Author author) {
+    public void setAuthor(AuthorEntity author) {
         this.author = author;
     }
 
@@ -54,7 +54,7 @@ public class Book {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Book book = (Book) o;
+        BookEntity book = (BookEntity) o;
         return Objects.equals(id, book.id) && Objects.equals(name, book.name) && Objects.equals(description, book.description) && Objects.equals(author, book.author);
     }
 

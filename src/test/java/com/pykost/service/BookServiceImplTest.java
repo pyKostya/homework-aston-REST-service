@@ -1,9 +1,10 @@
 package com.pykost.service;
 
 import com.pykost.dao.BookDAO;
+import com.pykost.dto.AuthorForBookDTO;
 import com.pykost.dto.BookDTO;
-import com.pykost.entity.Author;
-import com.pykost.entity.Book;
+import com.pykost.entity.AuthorEntity;
+import com.pykost.entity.BookEntity;
 import com.pykost.mapper.BookMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,25 +28,30 @@ class BookServiceImplTest {
     private BookMapper bookMapper;
     @InjectMocks
     private BookServiceImpl bookService;
-    private Author author;
-    private Book book;
+    private AuthorEntity author;
+    private AuthorForBookDTO authorForBookDTO;
+    private BookEntity book;
     private BookDTO bookDTO;
 
     @BeforeEach
     void setUp() {
-        author = new Author(1L, "Author");
+        author = new AuthorEntity(1L, "Author");
 
-        book = new Book();
+        book = new BookEntity();
         book.setId(1L);
         book.setName("Book");
         book.setDescription("Description");
         book.setAuthor(author);
 
+        authorForBookDTO = new AuthorForBookDTO();
+        authorForBookDTO.setId(1L);
+        authorForBookDTO.setName("Book");
+
         bookDTO = new BookDTO();
         bookDTO.setId(1L);
         bookDTO.setName("Book");
         bookDTO.setDescription("Description");
-        bookDTO.setAuthorId(author.getId());
+        bookDTO.setAuthor(authorForBookDTO);
     }
 
     @Test
@@ -60,7 +66,7 @@ class BookServiceImplTest {
         assertThat(bookDTO.getId()).isEqualTo(expected.getId());
         assertThat(bookDTO.getName()).isEqualTo(expected.getName());
         assertThat(bookDTO.getDescription()).isEqualTo(expected.getDescription());
-        assertThat(bookDTO.getAuthorId()).isEqualTo(expected.getAuthorId());
+        assertThat(bookDTO.getAuthor()).isEqualTo(expected.getAuthor());
 
         verify(bookMapper, times(1)).toEntity(bookDTO);
         verify(bookDAO, times(1)).save(book);
@@ -78,7 +84,7 @@ class BookServiceImplTest {
         assertThat(expected.get().getId()).isEqualTo(bookDTO.getId());
         assertThat(expected.get().getName()).isEqualTo(bookDTO.getName());
         assertThat(expected.get().getDescription()).isEqualTo(bookDTO.getDescription());
-        assertThat(expected.get().getAuthorId()).isEqualTo(bookDTO.getAuthorId());
+        assertThat(expected.get().getAuthor()).isEqualTo(bookDTO.getAuthor());
 
         verify(bookDAO, times(1)).findById(book.getId());
         verify(bookMapper, times(1)).toDTO(book);
@@ -91,30 +97,34 @@ class BookServiceImplTest {
         boolean result = bookService.delete(bookDTO.getId());
 
         assertThat(result).isTrue();
-
         verify(bookDAO, times(1)).delete(book.getId());
     }
 
     @Test
     void update() {
         doReturn(book).when(bookMapper).toEntity(bookDTO);
-        bookService.update(bookDTO.getId(), bookDTO);
+        doReturn(true).when(bookDAO).update(book);
+
+        boolean updateResult = bookService.update(bookDTO.getId(), bookDTO);
+
+        assertThat(updateResult).isTrue();
         verify(bookMapper, times(1)).toEntity(bookDTO);
+        verify(bookDAO, times(1)).update(book);
     }
 
     @Test
     void getAllBooks() {
-        List<Book> bookList = List.of(book);
+        List<BookEntity> bookList = List.of(book);
         List<BookDTO> bookDTOList = List.of(bookDTO);
 
-        doReturn(bookList).when(bookDAO).getAllEntity();
+        doReturn(bookList).when(bookDAO).findAll();
         doReturn(bookDTO).when(bookMapper).toDTO(book);
 
         List<BookDTO> result = bookService.getAll();
 
         assertThat(result).containsAll(bookDTOList);
 
-        verify(bookDAO, times(1)).getAllEntity();
+        verify(bookDAO, times(1)).findAll();
         verify(bookMapper, times(1)).toDTO(book);
     }
 }

@@ -1,11 +1,12 @@
 package com.pykost.dto;
 
+import java.util.Objects;
 
 public class BookDTO {
     private Long id;
     private String name;
     private String description;
-    private Long authorId;
+    private AuthorForBookDTO author;
 
     public Long getId() {
         return id;
@@ -31,11 +32,24 @@ public class BookDTO {
         this.description = description;
     }
 
-    public Long getAuthorId() {
-        return authorId;
+    public AuthorForBookDTO getAuthor() {
+        return author;
     }
 
-    public void setAuthorId(Long authorId) {
-        this.authorId = authorId;
+    public void setAuthor(AuthorForBookDTO author) {
+        this.author = author;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookDTO bookDTO = (BookDTO) o;
+        return Objects.equals(id, bookDTO.id) && Objects.equals(name, bookDTO.name) && Objects.equals(description, bookDTO.description) && Objects.equals(author, bookDTO.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, author);
     }
 }

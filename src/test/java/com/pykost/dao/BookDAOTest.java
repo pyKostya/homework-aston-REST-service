@@ -1,9 +1,11 @@
 package com.pykost.dao;
 
-import com.pykost.entity.Author;
-import com.pykost.entity.Book;
+import com.pykost.entity.AuthorEntity;
+import com.pykost.entity.BookEntity;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -23,23 +25,102 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 class BookDAOTest {
     @Container
-    private final PostgreSQLContainer<?> postgresContainer =
+    private static final PostgreSQLContainer<?> postgresContainer =
             new PostgreSQLContainer<>("postgres:17")
                     .withDatabaseName("testBook")
                     .withUsername("user")
                     .withPassword("pass");
 
     private BookDAO bookDAO;
+    private static DataSource dataSource;
 
-    @BeforeEach
-    void setUp() throws SQLException {
+    @BeforeAll
+    static void beforeAll() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(postgresContainer.getJdbcUrl());
         config.setUsername(postgresContainer.getUsername());
         config.setPassword(postgresContainer.getPassword());
-        DataSource dataSource = new HikariDataSource(config);
+        dataSource = new HikariDataSource(config);
+    }
 
+    @BeforeEach
+    void setUp() throws SQLException {
         bookDAO = new BookDAO(dataSource);
+        initializeDatabase(dataSource);
+    }
+
+    @AfterEach
+    void afterEach() throws SQLException {
+        clearDatabase(dataSource);
+    }
+
+    @Test
+    void delete() {
+        boolean expected = bookDAO.delete(2L);
+        assertThat(expected).isTrue();
+
+        List<BookEntity> listExpected = bookDAO.findAll();
+        assertThat(listExpected).hasSize(2);
+    }
+
+    @Test
+    void save() {
+        BookEntity book = new BookEntity();
+        book.setName("Book4");
+        book.setDescription("description4");
+        book.setAuthor(new AuthorEntity(2L, "Author2"));
+        BookEntity expected = bookDAO.save(book);
+
+        assertThat(expected.getId()).isEqualTo(4L);
+        assertThat(expected.getName()).isEqualTo(book.getName());
+        assertThat(expected.getDescription()).isEqualTo(book.getDescription());
+        assertThat(expected.getAuthor().getId()).isEqualTo(book.getAuthor().getId());
+
+        List<BookEntity> listActual = bookDAO.findAll();
+        assertThat(listActual).hasSize(4);
+    }
+
+    @Test
+    void update() {
+        BookEntity book = new BookEntity();
+        book.setId(3L);
+        book.setName("Book333");
+        book.setDescription("description333");
+        book.setAuthor(new AuthorEntity(2L, "Author2"));
+
+        boolean updateResult = bookDAO.update(book);
+        assertThat(updateResult).isTrue();
+
+        Optional<BookEntity> expected = bookDAO.findById(3L);
+
+        assertThat(expected).isPresent();
+        assertThat(expected.get().getId()).isEqualTo(3L);
+        assertThat(expected.get().getName()).isEqualTo(book.getName());
+        assertThat(expected.get().getDescription()).isEqualTo(book.getDescription());
+        assertThat(expected.get().getAuthor().getId()).isEqualTo(book.getAuthor().getId());
+    }
+
+    @Test
+    void findById() {
+        Optional<BookEntity> expected = bookDAO.findById(2L);
+
+        assertThat(expected).isPresent();
+        assertThat(expected.get().getId()).isEqualTo(2L);
+        assertThat(expected.get().getName()).isEqualTo("Book2");
+    }
+
+    @Test
+    void getAllEntity() {
+        BookEntity book = new BookEntity(3L, "Book3",
+                "description3", new AuthorEntity(1L, "Author1"));
+        List<BookEntity> daoAllEntity = bookDAO.findAll();
+
+        assertThat(daoAllEntity)
+                .hasSize(3)
+                .contains(book);
+    }
+
+    private static void initializeDatabase(DataSource dataSource) throws SQLException {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE author (id BIGSERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL)");
@@ -58,68 +139,12 @@ class BookDAOTest {
                               "VALUES ('Book3', 'description3', 1)");
         }
     }
+    private static void clearDatabase(DataSource dataSource) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
 
-    @Test
-    void delete() {
-        boolean expected = bookDAO.delete(2L);
-        assertThat(expected).isTrue();
-
-        List<Book> listExpected = bookDAO.getAllEntity();
-        assertThat(listExpected).hasSize(2);
-    }
-
-    @Test
-    void save() {
-        Book book = new Book();
-        book.setName("Book4");
-        book.setDescription("description4");
-        book.setAuthor(new Author(2L, "Author2"));
-        Book expected = bookDAO.save(book);
-
-        assertThat(expected.getId()).isEqualTo(4L);
-        assertThat(expected.getName()).isEqualTo(book.getName());
-        assertThat(expected.getDescription()).isEqualTo(book.getDescription());
-        assertThat(expected.getAuthor().getId()).isEqualTo(book.getAuthor().getId());
-
-        List<Book> listActual = bookDAO.getAllEntity();
-        assertThat(listActual).hasSize(4);
-    }
-
-    @Test
-    void update() {
-        Book book = new Book();
-        book.setId(3L);
-        book.setName("Book333");
-        book.setDescription("description333");
-        book.setAuthor(new Author(2L, "Author2"));
-
-        bookDAO.update(book);
-        Optional<Book> expected = bookDAO.findById(3L);
-
-        assertThat(expected).isPresent();
-        assertThat(expected.get().getId()).isEqualTo(3L);
-        assertThat(expected.get().getName()).isEqualTo(book.getName());
-        assertThat(expected.get().getDescription()).isEqualTo(book.getDescription());
-        assertThat(expected.get().getAuthor().getId()).isEqualTo(book.getAuthor().getId());
-    }
-
-    @Test
-    void findById() {
-        Optional<Book> expected = bookDAO.findById(2L);
-
-        assertThat(expected).isPresent();
-        assertThat(expected.get().getId()).isEqualTo(2L);
-        assertThat(expected.get().getName()).isEqualTo("Book2");
-    }
-
-    @Test
-    void getAllEntity() {
-        Book book = new Book(3L, "Book3",
-                "description3", new Author(1L, "Author1"));
-        List<Book> daoAllEntity = bookDAO.getAllEntity();
-
-        assertThat(daoAllEntity)
-                .hasSize(3)
-                .contains(book);
+            statement.execute("DROP TABLE book");
+            statement.execute("DROP TABLE author");
+        }
     }
 }

@@ -1,8 +1,9 @@
 package com.pykost.dao;
 
-import com.pykost.entity.Author;
-import com.pykost.entity.Book;
+import com.pykost.entity.AuthorEntity;
+import com.pykost.entity.BookEntity;
 import com.pykost.exception.DAOException;
+import com.pykost.util.HikariCPDataSource;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -10,8 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
+public class AuthorDAO implements BaseDAO<AuthorEntity, Long> {
     private final DataSource dataSource;
+
+    public AuthorDAO() {
+        this.dataSource = HikariCPDataSource.getDataSource();
+    }
 
     public AuthorDAO(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -30,13 +35,14 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
     }
 
     @Override
-    public Author save(Author author) {
+    public AuthorEntity save(AuthorEntity author) {
         String saveSql = "INSERT INTO author(name) VALUES (?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement =
                      connection.prepareStatement(saveSql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, author.getName());
             preparedStatement.executeUpdate();
+
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     author.setId(generatedKeys.getLong("id"));
@@ -49,29 +55,28 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
     }
 
     @Override
-    public void update(Author author) {
+    public boolean update(AuthorEntity author) {
         String updateSql = "UPDATE author SET name = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
             preparedStatement.setString(1, author.getName());
             preparedStatement.setLong(2, author.getId());
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DAOException(e);
         }
     }
 
     @Override
-    public Optional<Author> findById(Long id) {
+    public Optional<AuthorEntity> findById(Long id) {
         String findByAuthorIdSql = "SELECT * FROM author WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findByAuthorIdSql)) {
-
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
                 if (resultSet.next()) {
-                    Author author = mapResultSetToAuthor(resultSet);
+                    AuthorEntity author = mapResultSetToAuthor(resultSet);
                     author.setBooks(findBooksByAuthorId(author.getId()));
                     return Optional.of(author);
                 }
@@ -83,14 +88,14 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
     }
 
     @Override
-    public List<Author> getAllEntity() {
+    public List<AuthorEntity> findAll() {
         String getAllAuthorSql = "SELECT * FROM author";
-        List<Author> list = new ArrayList<>();
+        List<AuthorEntity> list = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(getAllAuthorSql)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    Author author = mapResultSetToAuthor(resultSet);
+                    AuthorEntity author = mapResultSetToAuthor(resultSet);
                     list.add(author);
                 }
                 return list;
@@ -100,9 +105,9 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
         }
     }
 
-    private List<Book> findBooksByAuthorId(Long authorId) {
+    private List<BookEntity> findBooksByAuthorId(Long authorId) {
         String findByBookIdSql = "SELECT * FROM book WHERE author_id = ?";
-        List<Book> books = new ArrayList<>();
+        List<BookEntity> books = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findByBookIdSql)) {
@@ -119,21 +124,23 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
         }
     }
 
-    private Author mapResultSetToAuthor(ResultSet resultSet) throws SQLException {
-        Author newAuthor = new Author();
+    private AuthorEntity mapResultSetToAuthor(ResultSet resultSet) throws SQLException {
+        AuthorEntity newAuthor = new AuthorEntity();
         newAuthor.setId(resultSet.getLong("id"));
         newAuthor.setName(resultSet.getString("name"));
         return newAuthor;
     }
 
-    private Book mapResultSetToBook(ResultSet resultSet) throws SQLException {
-        Book book = new Book();
+    private BookEntity mapResultSetToBook(ResultSet resultSet) throws SQLException {
+        BookEntity book = new BookEntity();
         book.setId(resultSet.getLong("id"));
         book.setName(resultSet.getString("name"));
         book.setDescription(resultSet.getString("description"));
 
-        Author author = new Author();
+        AuthorEntity author = new AuthorEntity();
         author.setId(resultSet.getLong("author_id"));
+        author.setName(resultSet.getString("name"));
+
         book.setAuthor(author);
 
         return book;

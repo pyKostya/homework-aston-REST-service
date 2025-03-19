@@ -2,6 +2,7 @@ package com.pykost.dao;
 
 import com.pykost.entity.Book;
 import com.pykost.exception.DAOException;
+import com.pykost.util.HikariCPDataSource;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -9,10 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BookDAO implements DAO<Book, Long>, GetAll<Book, Long> {
+public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
 
     private final DataSource dataSource;
     private final AuthorDAO authorDAO;
+
+    public BookDAO() {
+        this.dataSource = HikariCPDataSource.getDataSource();
+        this.authorDAO = new AuthorDAO();
+    }
 
     public BookDAO(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -54,7 +60,7 @@ public class BookDAO implements DAO<Book, Long>, GetAll<Book, Long> {
     }
 
     @Override
-    public void update(Book book) {
+    public boolean update(Book book) {
         String updateSql = "UPDATE book SET name = ?, description = ?, author_id = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
@@ -62,7 +68,7 @@ public class BookDAO implements DAO<Book, Long>, GetAll<Book, Long> {
             preparedStatement.setString(2, book.getDescription());
             preparedStatement.setLong(3, book.getAuthor().getId());
             preparedStatement.setLong(4, book.getId());
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DAOException(e);
         }

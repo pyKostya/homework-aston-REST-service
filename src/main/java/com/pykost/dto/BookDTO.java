@@ -1,5 +1,6 @@
 package com.pykost.dto;
 
+import java.util.Objects;
 
 public class BookDTO {
     private Long id;
@@ -37,5 +38,18 @@ public class BookDTO {
 
     public void setAuthorId(Long authorId) {
         this.authorId = authorId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookDTO bookDTO = (BookDTO) o;
+        return Objects.equals(id, bookDTO.id) && Objects.equals(name, bookDTO.name) && Objects.equals(description, bookDTO.description) && Objects.equals(authorId, bookDTO.authorId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, authorId);
     }
 }

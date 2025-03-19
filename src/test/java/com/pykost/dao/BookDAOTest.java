@@ -4,6 +4,8 @@ import com.pykost.entity.Author;
 import com.pykost.entity.Book;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -23,40 +25,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 class BookDAOTest {
     @Container
-    private final PostgreSQLContainer<?> postgresContainer =
+    private static final PostgreSQLContainer<?> postgresContainer =
             new PostgreSQLContainer<>("postgres:17")
                     .withDatabaseName("testBook")
                     .withUsername("user")
                     .withPassword("pass");
 
     private BookDAO bookDAO;
+    private static DataSource dataSource;
 
-    @BeforeEach
-    void setUp() throws SQLException {
+    @BeforeAll
+    static void beforeAll() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(postgresContainer.getJdbcUrl());
         config.setUsername(postgresContainer.getUsername());
         config.setPassword(postgresContainer.getPassword());
-        DataSource dataSource = new HikariDataSource(config);
+        dataSource = new HikariDataSource(config);
+    }
 
+    @BeforeEach
+    void setUp() throws SQLException {
         bookDAO = new BookDAO(dataSource);
-        try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE author (id BIGSERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL)");
-            statement.execute("create table Book (id BIGSERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL, " +
-                              "description VARCHAR(200), author_id BIGINT NOT NULL," +
-                              "FOREIGN KEY (author_id) references Author (id))");
+        initializeDatabase(dataSource);
+    }
 
-            statement.execute("INSERT INTO author (name) VALUES ('Author1')");
-            statement.execute("INSERT INTO author (name) VALUES ('Author2')");
-
-            statement.execute("INSERT INTO book (name, description, author_id) " +
-                              "VALUES ('Book1', 'description1', 1)");
-            statement.execute("INSERT INTO book (name, description, author_id) " +
-                              "VALUES ('Book2', 'description2', 2)");
-            statement.execute("INSERT INTO book (name, description, author_id) " +
-                              "VALUES ('Book3', 'description3', 1)");
-        }
+    @AfterEach
+    void afterEach() throws SQLException {
+        clearDatabase(dataSource);
     }
 
     @Test
@@ -93,7 +88,9 @@ class BookDAOTest {
         book.setDescription("description333");
         book.setAuthor(new Author(2L, "Author2"));
 
-        bookDAO.update(book);
+        boolean updateResult = bookDAO.update(book);
+        assertThat(updateResult).isTrue();
+
         Optional<Book> expected = bookDAO.findById(3L);
 
         assertThat(expected).isPresent();
@@ -121,5 +118,33 @@ class BookDAOTest {
         assertThat(daoAllEntity)
                 .hasSize(3)
                 .contains(book);
+    }
+
+    private static void initializeDatabase(DataSource dataSource) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute("CREATE TABLE author (id BIGSERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL)");
+            statement.execute("create table Book (id BIGSERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL, " +
+                              "description VARCHAR(200), author_id BIGINT NOT NULL," +
+                              "FOREIGN KEY (author_id) references Author (id))");
+
+            statement.execute("INSERT INTO author (name) VALUES ('Author1')");
+            statement.execute("INSERT INTO author (name) VALUES ('Author2')");
+
+            statement.execute("INSERT INTO book (name, description, author_id) " +
+                              "VALUES ('Book1', 'description1', 1)");
+            statement.execute("INSERT INTO book (name, description, author_id) " +
+                              "VALUES ('Book2', 'description2', 2)");
+            statement.execute("INSERT INTO book (name, description, author_id) " +
+                              "VALUES ('Book3', 'description3', 1)");
+        }
+    }
+    private static void clearDatabase(DataSource dataSource) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+
+            statement.execute("DROP TABLE book");
+            statement.execute("DROP TABLE author");
+        }
     }
 }

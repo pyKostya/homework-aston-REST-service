@@ -10,7 +10,7 @@ public interface Service<E, K> {
 
     boolean delete(K k);
 
-    void update(K k, E e);
+    boolean update(K k, E e);
 
     List<E> getAll();
 

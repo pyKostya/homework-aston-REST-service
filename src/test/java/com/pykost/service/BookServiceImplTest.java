@@ -91,15 +91,19 @@ class BookServiceImplTest {
         boolean result = bookService.delete(bookDTO.getId());
 
         assertThat(result).isTrue();
-
         verify(bookDAO, times(1)).delete(book.getId());
     }
 
     @Test
     void update() {
         doReturn(book).when(bookMapper).toEntity(bookDTO);
-        bookService.update(bookDTO.getId(), bookDTO);
+        doReturn(true).when(bookDAO).update(book);
+
+        boolean updateResult = bookService.update(bookDTO.getId(), bookDTO);
+
+        assertThat(updateResult).isTrue();
         verify(bookMapper, times(1)).toEntity(bookDTO);
+        verify(bookDAO, times(1)).update(book);
     }
 
     @Test

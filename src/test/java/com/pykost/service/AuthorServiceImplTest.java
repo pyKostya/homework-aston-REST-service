@@ -82,8 +82,10 @@ class AuthorServiceImplTest {
     @Test
     void update() {
         doReturn(author).when(authorMapper).toEntity(authorDTO);
-        authorService.update(1L, authorDTO);
+        doReturn(true).when(authorDAO).update(author);
+        boolean updateResult = authorService.update(author.getId(), authorDTO);
 
+        assertThat(updateResult).isTrue();
         verify(authorMapper, times(1)).toEntity(authorDTO);
         verify(authorDAO, times(1)).update(author);
     }

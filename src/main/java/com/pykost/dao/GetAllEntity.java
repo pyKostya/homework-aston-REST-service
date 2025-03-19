@@ -2,7 +2,7 @@ package com.pykost.dao;
 
 import java.util.List;
 
-public interface GetAll<E, K> {
+public interface GetAllEntity<E, K> {
 
     List<E> getAllEntity();
 }

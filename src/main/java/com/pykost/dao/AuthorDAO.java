@@ -3,6 +3,7 @@ package com.pykost.dao;
 import com.pykost.entity.Author;
 import com.pykost.entity.Book;
 import com.pykost.exception.DAOException;
+import com.pykost.util.HikariCPDataSource;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -10,8 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
+public class AuthorDAO implements CRUD<Author, Long>, GetAllEntity<Author, Long> {
     private final DataSource dataSource;
+
+    public AuthorDAO() {
+        this.dataSource = HikariCPDataSource.getDataSource();
+    }
 
     public AuthorDAO(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -37,6 +42,7 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
                      connection.prepareStatement(saveSql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, author.getName());
             preparedStatement.executeUpdate();
+
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     author.setId(generatedKeys.getLong("id"));
@@ -49,13 +55,13 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
     }
 
     @Override
-    public void update(Author author) {
+    public boolean update(Author author) {
         String updateSql = "UPDATE author SET name = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
             preparedStatement.setString(1, author.getName());
             preparedStatement.setLong(2, author.getId());
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DAOException(e);
         }
@@ -66,7 +72,6 @@ public class AuthorDAO implements DAO<Author, Long>, GetAll<Author, Long> {
         String findByAuthorIdSql = "SELECT * FROM author WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findByAuthorIdSql)) {
-
             preparedStatement.setLong(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
 

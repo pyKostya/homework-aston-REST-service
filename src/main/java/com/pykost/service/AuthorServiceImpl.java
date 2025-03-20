@@ -2,7 +2,7 @@ package com.pykost.service;
 
 import com.pykost.dao.AuthorDAO;
 import com.pykost.dto.AuthorDTO;
-import com.pykost.entity.Author;
+import com.pykost.entity.AuthorEntity;
 import com.pykost.mapper.AuthorMapper;
 import com.pykost.mapper.AuthorMapperImpl;
 
@@ -25,8 +25,8 @@ public class AuthorServiceImpl implements Service<AuthorDTO, Long> {
 
     @Override
     public AuthorDTO create(AuthorDTO authorDTO) {
-        Author entity = authorMapper.toEntity(authorDTO);
-        Author save = authorDAO.save(entity);
+        AuthorEntity entity = authorMapper.toEntity(authorDTO);
+        AuthorEntity save = authorDAO.save(entity);
         return authorMapper.toDTO(save);
     }
 
@@ -43,14 +43,14 @@ public class AuthorServiceImpl implements Service<AuthorDTO, Long> {
 
     @Override
     public boolean update(Long id, AuthorDTO authorDTO) {
-        Author entity = authorMapper.toEntity(authorDTO);
+        AuthorEntity entity = authorMapper.toEntity(authorDTO);
         entity.setId(id);
         return authorDAO.update(entity);
     }
 
     @Override
     public List<AuthorDTO> getAll() {
-        return authorDAO.getAllEntity().stream()
+        return authorDAO.findAll().stream()
                 .map(authorMapper::toDTO)
                 .toList();
     }

@@ -1,7 +1,7 @@
 package com.pykost.dao;
 
-import com.pykost.entity.Author;
-import com.pykost.entity.Book;
+import com.pykost.entity.AuthorEntity;
+import com.pykost.entity.BookEntity;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.AfterEach;
@@ -59,39 +59,39 @@ class BookDAOTest {
         boolean expected = bookDAO.delete(2L);
         assertThat(expected).isTrue();
 
-        List<Book> listExpected = bookDAO.getAllEntity();
+        List<BookEntity> listExpected = bookDAO.findAll();
         assertThat(listExpected).hasSize(2);
     }
 
     @Test
     void save() {
-        Book book = new Book();
+        BookEntity book = new BookEntity();
         book.setName("Book4");
         book.setDescription("description4");
-        book.setAuthor(new Author(2L, "Author2"));
-        Book expected = bookDAO.save(book);
+        book.setAuthor(new AuthorEntity(2L, "Author2"));
+        BookEntity expected = bookDAO.save(book);
 
         assertThat(expected.getId()).isEqualTo(4L);
         assertThat(expected.getName()).isEqualTo(book.getName());
         assertThat(expected.getDescription()).isEqualTo(book.getDescription());
         assertThat(expected.getAuthor().getId()).isEqualTo(book.getAuthor().getId());
 
-        List<Book> listActual = bookDAO.getAllEntity();
+        List<BookEntity> listActual = bookDAO.findAll();
         assertThat(listActual).hasSize(4);
     }
 
     @Test
     void update() {
-        Book book = new Book();
+        BookEntity book = new BookEntity();
         book.setId(3L);
         book.setName("Book333");
         book.setDescription("description333");
-        book.setAuthor(new Author(2L, "Author2"));
+        book.setAuthor(new AuthorEntity(2L, "Author2"));
 
         boolean updateResult = bookDAO.update(book);
         assertThat(updateResult).isTrue();
 
-        Optional<Book> expected = bookDAO.findById(3L);
+        Optional<BookEntity> expected = bookDAO.findById(3L);
 
         assertThat(expected).isPresent();
         assertThat(expected.get().getId()).isEqualTo(3L);
@@ -102,7 +102,7 @@ class BookDAOTest {
 
     @Test
     void findById() {
-        Optional<Book> expected = bookDAO.findById(2L);
+        Optional<BookEntity> expected = bookDAO.findById(2L);
 
         assertThat(expected).isPresent();
         assertThat(expected.get().getId()).isEqualTo(2L);
@@ -111,9 +111,9 @@ class BookDAOTest {
 
     @Test
     void getAllEntity() {
-        Book book = new Book(3L, "Book3",
-                "description3", new Author(1L, "Author1"));
-        List<Book> daoAllEntity = bookDAO.getAllEntity();
+        BookEntity book = new BookEntity(3L, "Book3",
+                "description3", new AuthorEntity(1L, "Author1"));
+        List<BookEntity> daoAllEntity = bookDAO.findAll();
 
         assertThat(daoAllEntity)
                 .hasSize(3)

@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Author {
+public class AuthorEntity {
     private Long id;
     private String name;
-    private List<Book> books;
+    private List<BookEntity> books;
 
-    public Author() {
+    public AuthorEntity() {
         this.books = new ArrayList<>();
     }
 
-    public Author(Long id, String name) {
+    public AuthorEntity(Long id, String name) {
         this.id = id;
         this.name = name;
         this.books = new ArrayList<>();
@@ -35,11 +35,11 @@ public class Author {
         this.name = name;
     }
 
-    public List<Book> getBooks() {
+    public List<BookEntity> getBooks() {
         return books;
     }
 
-    public void setBooks(List<Book> books) {
+    public void setBooks(List<BookEntity> books) {
         this.books = books;
     }
 
@@ -47,8 +47,8 @@ public class Author {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Author author = (Author) o;
-        return Objects.equals(id, author.id) && Objects.equals(name, author.name);
+        AuthorEntity authorEntity = (AuthorEntity) o;
+        return Objects.equals(id, authorEntity.id) && Objects.equals(name, authorEntity.name);
     }
 
     @Override

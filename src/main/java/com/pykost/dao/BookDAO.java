@@ -1,6 +1,6 @@
 package com.pykost.dao;
 
-import com.pykost.entity.Book;
+import com.pykost.entity.BookEntity;
 import com.pykost.exception.DAOException;
 import com.pykost.util.HikariCPDataSource;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
+public class BookDAO implements BaseDAO<BookEntity, Long> {
 
     private final DataSource dataSource;
     private final AuthorDAO authorDAO;
@@ -38,7 +38,7 @@ public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
     }
 
     @Override
-    public Book save(Book book) {
+    public BookEntity save(BookEntity book) {
         String saveSql = "INSERT INTO book(name, description, author_id) VALUES (?,?,?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement =
@@ -60,7 +60,7 @@ public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
     }
 
     @Override
-    public boolean update(Book book) {
+    public boolean update(BookEntity book) {
         String updateSql = "UPDATE book SET name = ?, description = ?, author_id = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
@@ -75,7 +75,7 @@ public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
     }
 
     @Override
-    public Optional<Book> findById(Long id) {
+    public Optional<BookEntity> findById(Long id) {
         String findByIdSql = "SELECT * FROM book WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findByIdSql)) {
@@ -83,7 +83,7 @@ public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    Book book = mapResultSetToBook(resultSet);
+                    BookEntity book = mapResultSetToBook(resultSet);
                     return Optional.of(book);
                 }
             }
@@ -94,15 +94,15 @@ public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
     }
 
     @Override
-    public List<Book> getAllEntity() {
+    public List<BookEntity> findAll() {
         String findAllBooksByAuthorSql = "SELECT * FROM book";
-        List<Book> books = new ArrayList<>();
+        List<BookEntity> books = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(findAllBooksByAuthorSql)) {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    Book book = mapResultSetToBook(resultSet);
+                    BookEntity book = mapResultSetToBook(resultSet);
                     books.add(book);
                 }
                 return books;
@@ -112,8 +112,8 @@ public class BookDAO implements CRUD<Book, Long>, GetAllEntity<Book, Long> {
         }
     }
 
-    private Book mapResultSetToBook(ResultSet resultSet) throws SQLException {
-        Book book = new Book();
+    private BookEntity mapResultSetToBook(ResultSet resultSet) throws SQLException {
+        BookEntity book = new BookEntity();
         book.setId(resultSet.getLong("id"));
         book.setName(resultSet.getString("name"));
         book.setDescription(resultSet.getString("description"));

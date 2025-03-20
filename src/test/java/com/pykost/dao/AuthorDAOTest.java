@@ -1,6 +1,6 @@
 package com.pykost.dao;
 
-import com.pykost.entity.Author;
+import com.pykost.entity.AuthorEntity;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.*;
@@ -55,32 +55,32 @@ class AuthorDAOTest {
         boolean expected = authorDAO.delete(2L);
         assertThat(expected).isTrue();
 
-        List<Author> listExpected = authorDAO.getAllEntity();
+        List<AuthorEntity> listExpected = authorDAO.findAll();
         assertThat(listExpected)
                 .hasSize(1)
-                .contains(new Author(1L, "Author1"));
+                .contains(new AuthorEntity(1L, "Author1"));
     }
 
     @Test
     void save() {
-        Author author = new Author();
-        author.setName("Author3");
-        Author expected = authorDAO.save(author);
+        AuthorEntity authorEntity = new AuthorEntity();
+        authorEntity.setName("Author3");
+        AuthorEntity expected = authorDAO.save(authorEntity);
 
         assertThat(expected.getId()).isEqualTo(3L);
-        assertThat(expected.getName()).isEqualTo(author.getName());
+        assertThat(expected.getName()).isEqualTo(authorEntity.getName());
 
-        List<Author> listActual = authorDAO.getAllEntity();
+        List<AuthorEntity> listActual = authorDAO.findAll();
         assertThat(listActual).hasSize(3);
     }
 
     @Test
     void update() {
-        Author author = new Author(1L, "Author111");
-        boolean expected = authorDAO.update(author);
+        AuthorEntity authorEntity = new AuthorEntity(1L, "Author111");
+        boolean expected = authorDAO.update(authorEntity);
         assertThat(expected).isTrue();
 
-        Optional<Author> author1 = authorDAO.findById(1L);
+        Optional<AuthorEntity> author1 = authorDAO.findById(1L);
 
         assertThat(author1).isPresent();
         assertThat(author1.get().getId()).isEqualTo(1L);
@@ -89,7 +89,7 @@ class AuthorDAOTest {
 
     @Test
     void findById() {
-        Optional<Author> author = authorDAO.findById(1L);
+        Optional<AuthorEntity> author = authorDAO.findById(1L);
 
         assertThat(author).isPresent();
         assertThat(author.get().getId()).isEqualTo(1L);
@@ -98,9 +98,9 @@ class AuthorDAOTest {
 
     @Test
     void getAllEntity() {
-        List<Author> actual = List.of(new Author(1L, "Author1"),
-                new Author(2L, "Author2"));
-        List<Author> expected = authorDAO.getAllEntity();
+        List<AuthorEntity> actual = List.of(new AuthorEntity(1L, "Author1"),
+                new AuthorEntity(2L, "Author2"));
+        List<AuthorEntity> expected = authorDAO.findAll();
         assertThat(expected)
                 .hasSize(2)
                 .containsAll(actual);

@@ -2,20 +2,20 @@ package com.pykost.entity;
 
 import java.util.Objects;
 
-public class Book {
+public class BookEntity {
     private Long id;
     private String name;
     private String description;
-    private Author author;
+    private AuthorEntity authorEntity;
 
-    public Book() {
+    public BookEntity() {
     }
 
-    public Book(Long id, String name, String description, Author author) {
+    public BookEntity(Long id, String name, String description, AuthorEntity authorEntity) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.author = author;
+        this.authorEntity = authorEntity;
     }
 
     public Long getId() {
@@ -42,24 +42,24 @@ public class Book {
         this.description = description;
     }
 
-    public Author getAuthor() {
-        return author;
+    public AuthorEntity getAuthor() {
+        return authorEntity;
     }
 
-    public void setAuthor(Author author) {
-        this.author = author;
+    public void setAuthor(AuthorEntity authorEntity) {
+        this.authorEntity = authorEntity;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Book book = (Book) o;
-        return Objects.equals(id, book.id) && Objects.equals(name, book.name) && Objects.equals(description, book.description) && Objects.equals(author, book.author);
+        BookEntity book = (BookEntity) o;
+        return Objects.equals(id, book.id) && Objects.equals(name, book.name) && Objects.equals(description, book.description) && Objects.equals(authorEntity, book.authorEntity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, author);
+        return Objects.hash(id, name, description, authorEntity);
     }
 }

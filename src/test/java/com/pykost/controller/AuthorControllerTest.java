@@ -52,7 +52,7 @@ class AuthorControllerTest {
 
     @Nested
     @DisplayName("Author tests for the get request")
-    class GetAuthorTest {
+    class GetAuthorTestEntity {
         @Test
         void doGetAllAuthorsSuccess() throws IOException {
             doReturn("/").when(request).getPathInfo();
@@ -138,7 +138,7 @@ class AuthorControllerTest {
 
     @Nested
     @DisplayName("Author tests for the put request")
-    class TestAuthorPut {
+    class TestAuthorPutEntity {
         @Test
         void doPutAuthorSuccess() throws IOException {
             String json = objectMapper.writeValueAsString(authorDTO);
@@ -168,7 +168,7 @@ class AuthorControllerTest {
 
     @Nested
     @DisplayName("Author tests for the delete request")
-    class TestAuthorDelete {
+    class TestAuthorDeleteEntity {
         @Test
         void doDeleteAuthorSuccess() {
             doReturn("/1").when(request).getPathInfo();

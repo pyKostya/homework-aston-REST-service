@@ -2,8 +2,8 @@ package com.pykost.service;
 
 import com.pykost.dao.BookDAO;
 import com.pykost.dto.BookDTO;
-import com.pykost.entity.Author;
-import com.pykost.entity.Book;
+import com.pykost.entity.AuthorEntity;
+import com.pykost.entity.BookEntity;
 import com.pykost.mapper.BookMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,15 +27,15 @@ class BookServiceImplTest {
     private BookMapper bookMapper;
     @InjectMocks
     private BookServiceImpl bookService;
-    private Author author;
-    private Book book;
+    private AuthorEntity author;
+    private BookEntity book;
     private BookDTO bookDTO;
 
     @BeforeEach
     void setUp() {
-        author = new Author(1L, "Author");
+        author = new AuthorEntity(1L, "Author");
 
-        book = new Book();
+        book = new BookEntity();
         book.setId(1L);
         book.setName("Book");
         book.setDescription("Description");
@@ -108,17 +108,17 @@ class BookServiceImplTest {
 
     @Test
     void getAllBooks() {
-        List<Book> bookList = List.of(book);
+        List<BookEntity> bookList = List.of(book);
         List<BookDTO> bookDTOList = List.of(bookDTO);
 
-        doReturn(bookList).when(bookDAO).getAllEntity();
+        doReturn(bookList).when(bookDAO).findAll();
         doReturn(bookDTO).when(bookMapper).toDTO(book);
 
         List<BookDTO> result = bookService.getAll();
 
         assertThat(result).containsAll(bookDTOList);
 
-        verify(bookDAO, times(1)).getAllEntity();
+        verify(bookDAO, times(1)).findAll();
         verify(bookMapper, times(1)).toDTO(book);
     }
 }

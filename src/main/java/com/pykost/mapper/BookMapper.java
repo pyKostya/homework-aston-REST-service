@@ -1,7 +1,7 @@
 package com.pykost.mapper;
 
 import com.pykost.dto.BookDTO;
-import com.pykost.entity.Book;
+import com.pykost.entity.BookEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -9,8 +9,8 @@ import org.mapstruct.Mapping;
 public interface BookMapper {
 
     @Mapping(source = "author.id", target = "authorId")
-    BookDTO toDTO(Book book);
+    BookDTO toDTO(BookEntity book);
 
     @Mapping(source = "authorId", target = "author.id")
-    Book toEntity(BookDTO bookDTO);
+    BookEntity toEntity(BookDTO bookDTO);
 }

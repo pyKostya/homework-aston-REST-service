@@ -1,13 +1,11 @@
 package com.pykost.dto;
 
 
-import java.util.List;
 import java.util.Objects;
 
 public class AuthorDTO {
     private Long id;
     private String name;
-    private List<BookDTO> books;
 
     public Long getId() {
         return id;
@@ -23,14 +21,6 @@ public class AuthorDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<BookDTO> getBooks() {
-        return books;
-    }
-
-    public void setBooks(List<BookDTO> books) {
-        this.books = books;
     }
 
     @Override

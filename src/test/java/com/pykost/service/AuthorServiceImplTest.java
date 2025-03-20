@@ -2,7 +2,7 @@ package com.pykost.service;
 
 import com.pykost.dao.AuthorDAO;
 import com.pykost.dto.AuthorDTO;
-import com.pykost.entity.Author;
+import com.pykost.entity.AuthorEntity;
 import com.pykost.mapper.AuthorMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,12 +27,12 @@ class AuthorServiceImplTest {
     private AuthorMapper authorMapper;
     @InjectMocks
     private AuthorServiceImpl authorService;
-    private Author author;
+    private AuthorEntity author;
     private AuthorDTO authorDTO;
 
     @BeforeEach
     void setUp() {
-        author = new Author(1L, "Author");
+        author = new AuthorEntity(1L, "Author");
 
         authorDTO = new AuthorDTO();
         authorDTO.setId(1L);
@@ -92,10 +92,10 @@ class AuthorServiceImplTest {
 
     @Test
     void getAllAuthors() {
-        List<Author> authorList = List.of(author);
+        List<AuthorEntity> authorEntityList = List.of(author);
         List<AuthorDTO> authorDTOList = List.of(authorDTO);
 
-        doReturn(authorList).when(authorDAO).getAllEntity();
+        doReturn(authorEntityList).when(authorDAO).findAll();
         doReturn(authorDTO).when(authorMapper).toDTO(author);
 
         List<AuthorDTO> allAuthors = authorService.getAll();

@@ -2,7 +2,7 @@ package com.pykost.service;
 
 import com.pykost.dao.BookDAO;
 import com.pykost.dto.BookDTO;
-import com.pykost.entity.Book;
+import com.pykost.entity.BookEntity;
 import com.pykost.mapper.BookMapper;
 import com.pykost.mapper.BookMapperImpl;
 
@@ -25,8 +25,8 @@ public class BookServiceImpl implements Service<BookDTO, Long> {
 
     @Override
     public BookDTO create(BookDTO bookDTO) {
-        Book entity = bookMapper.toEntity(bookDTO);
-        Book save = bookDAO.save(entity);
+        BookEntity entity = bookMapper.toEntity(bookDTO);
+        BookEntity save = bookDAO.save(entity);
         return bookMapper.toDTO(save);
     }
 
@@ -42,14 +42,14 @@ public class BookServiceImpl implements Service<BookDTO, Long> {
 
     @Override
     public boolean update(Long id, BookDTO bookDTO) {
-        Book entity = bookMapper.toEntity(bookDTO);
+        BookEntity entity = bookMapper.toEntity(bookDTO);
         entity.setId(id);
         return bookDAO.update(entity);
     }
 
     @Override
     public List<BookDTO> getAll() {
-        return bookDAO.getAllEntity().stream()
+        return bookDAO.findAll().stream()
                 .map(bookMapper::toDTO)
                 .toList();
     }

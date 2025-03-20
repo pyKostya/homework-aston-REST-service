@@ -1,23 +1,17 @@
 package com.pykost.mapper;
 
 import com.pykost.dto.AuthorDTO;
-import com.pykost.dto.BookDTO;
-import com.pykost.entity.Author;
-import com.pykost.entity.Book;
+import com.pykost.entity.AuthorEntity;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
-import java.util.List;
 
 @Mapper(uses = BookMapper.class)
 public interface AuthorMapper {
 
-    @Mapping(source = "books", target = "books")
-    Author toEntity(AuthorDTO authorDTO);
+    AuthorEntity toEntity(AuthorDTO authorDTO);
 
-    @Mapping(source = "books", target = "books")
-    AuthorDTO toDTO(Author author);
+    AuthorDTO toDTO(AuthorEntity authorEntity);
 
-    List<BookDTO> mapBooks(List<Book> books);
+
 
 }

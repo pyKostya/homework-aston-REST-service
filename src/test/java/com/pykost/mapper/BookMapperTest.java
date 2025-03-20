@@ -1,8 +1,8 @@
 package com.pykost.mapper;
 
 import com.pykost.dto.BookDTO;
-import com.pykost.entity.Author;
-import com.pykost.entity.Book;
+import com.pykost.entity.AuthorEntity;
+import com.pykost.entity.BookEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,17 +10,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BookMapperTest {
     private BookMapper bookMapper;
-    private Author author;
-    private Book book;
+    private AuthorEntity author;
+    private BookEntity book;
     private BookDTO bookDTO;
 
     @BeforeEach
     void setUp() {
         bookMapper = new BookMapperImpl();
 
-        author = new Author(1L, "Author");
+        author = new AuthorEntity(1L, "Author");
 
-        book = new Book();
+        book = new BookEntity();
         book.setId(1L);
         book.setName("Book");
         book.setDescription("Description");
@@ -44,7 +44,7 @@ class BookMapperTest {
 
     @Test
     void toEntity() {
-        Book expected = bookMapper.toEntity(bookDTO);
+        BookEntity expected = bookMapper.toEntity(bookDTO);
         assertThat(book.getId()).isEqualTo(expected.getId());
         assertThat(book.getName()).isEqualTo(expected.getName());
         assertThat(book.getDescription()).isEqualTo(expected.getDescription());

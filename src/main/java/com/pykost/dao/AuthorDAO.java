@@ -35,19 +35,19 @@ public class AuthorDAO implements BaseDAO<AuthorEntity, Long> {
     }
 
     @Override
-    public AuthorEntity save(AuthorEntity authorEntity) {
+    public AuthorEntity save(AuthorEntity author) {
         String saveSql = "INSERT INTO author(name) VALUES (?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement =
                      connection.prepareStatement(saveSql, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, authorEntity.getName());
+            preparedStatement.setString(1, author.getName());
             preparedStatement.executeUpdate();
 
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    authorEntity.setId(generatedKeys.getLong("id"));
+                    author.setId(generatedKeys.getLong("id"));
                 }
-                return authorEntity;
+                return author;
             }
         } catch (SQLException e) {
             throw new DAOException(e);
@@ -55,12 +55,12 @@ public class AuthorDAO implements BaseDAO<AuthorEntity, Long> {
     }
 
     @Override
-    public boolean update(AuthorEntity authorEntity) {
+    public boolean update(AuthorEntity author) {
         String updateSql = "UPDATE author SET name = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateSql)) {
-            preparedStatement.setString(1, authorEntity.getName());
-            preparedStatement.setLong(2, authorEntity.getId());
+            preparedStatement.setString(1, author.getName());
+            preparedStatement.setLong(2, author.getId());
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DAOException(e);
@@ -76,9 +76,9 @@ public class AuthorDAO implements BaseDAO<AuthorEntity, Long> {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
                 if (resultSet.next()) {
-                    AuthorEntity authorEntity = mapResultSetToAuthor(resultSet);
-                    authorEntity.setBooks(findBooksByAuthorId(authorEntity.getId()));
-                    return Optional.of(authorEntity);
+                    AuthorEntity author = mapResultSetToAuthor(resultSet);
+                    author.setBooks(findBooksByAuthorId(author.getId()));
+                    return Optional.of(author);
                 }
             }
         } catch (SQLException e) {
@@ -95,8 +95,8 @@ public class AuthorDAO implements BaseDAO<AuthorEntity, Long> {
              PreparedStatement preparedStatement = connection.prepareStatement(getAllAuthorSql)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    AuthorEntity authorEntity = mapResultSetToAuthor(resultSet);
-                    list.add(authorEntity);
+                    AuthorEntity author = mapResultSetToAuthor(resultSet);
+                    list.add(author);
                 }
                 return list;
             }
@@ -125,10 +125,10 @@ public class AuthorDAO implements BaseDAO<AuthorEntity, Long> {
     }
 
     private AuthorEntity mapResultSetToAuthor(ResultSet resultSet) throws SQLException {
-        AuthorEntity newAuthorEntity = new AuthorEntity();
-        newAuthorEntity.setId(resultSet.getLong("id"));
-        newAuthorEntity.setName(resultSet.getString("name"));
-        return newAuthorEntity;
+        AuthorEntity newAuthor = new AuthorEntity();
+        newAuthor.setId(resultSet.getLong("id"));
+        newAuthor.setName(resultSet.getString("name"));
+        return newAuthor;
     }
 
     private BookEntity mapResultSetToBook(ResultSet resultSet) throws SQLException {
@@ -137,9 +137,11 @@ public class AuthorDAO implements BaseDAO<AuthorEntity, Long> {
         book.setName(resultSet.getString("name"));
         book.setDescription(resultSet.getString("description"));
 
-        AuthorEntity authorEntity = new AuthorEntity();
-        authorEntity.setId(resultSet.getLong("author_id"));
-        book.setAuthor(authorEntity);
+        AuthorEntity author = new AuthorEntity();
+        author.setId(resultSet.getLong("author_id"));
+        author.setName(resultSet.getString("name"));
+
+        book.setAuthor(author);
 
         return book;
     }

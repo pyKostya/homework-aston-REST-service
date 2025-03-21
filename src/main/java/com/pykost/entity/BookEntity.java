@@ -6,16 +6,16 @@ public class BookEntity {
     private Long id;
     private String name;
     private String description;
-    private AuthorEntity authorEntity;
+    private AuthorEntity author;
 
     public BookEntity() {
     }
 
-    public BookEntity(Long id, String name, String description, AuthorEntity authorEntity) {
+    public BookEntity(Long id, String name, String description, AuthorEntity author) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.authorEntity = authorEntity;
+        this.author = author;
     }
 
     public Long getId() {
@@ -43,11 +43,11 @@ public class BookEntity {
     }
 
     public AuthorEntity getAuthor() {
-        return authorEntity;
+        return author;
     }
 
-    public void setAuthor(AuthorEntity authorEntity) {
-        this.authorEntity = authorEntity;
+    public void setAuthor(AuthorEntity author) {
+        this.author = author;
     }
 
     @Override
@@ -55,11 +55,11 @@ public class BookEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BookEntity book = (BookEntity) o;
-        return Objects.equals(id, book.id) && Objects.equals(name, book.name) && Objects.equals(description, book.description) && Objects.equals(authorEntity, book.authorEntity);
+        return Objects.equals(id, book.id) && Objects.equals(name, book.name) && Objects.equals(description, book.description) && Objects.equals(author, book.author);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, authorEntity);
+        return Objects.hash(id, name, description, author);
     }
 }

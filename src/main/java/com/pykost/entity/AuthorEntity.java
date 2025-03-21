@@ -47,8 +47,8 @@ public class AuthorEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AuthorEntity authorEntity = (AuthorEntity) o;
-        return Objects.equals(id, authorEntity.id) && Objects.equals(name, authorEntity.name);
+        AuthorEntity author = (AuthorEntity) o;
+        return Objects.equals(id, author.id) && Objects.equals(name, author.name);
     }
 
     @Override

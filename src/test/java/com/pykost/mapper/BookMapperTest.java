@@ -1,5 +1,6 @@
 package com.pykost.mapper;
 
+import com.pykost.dto.AuthorForBookDTO;
 import com.pykost.dto.BookDTO;
 import com.pykost.entity.AuthorEntity;
 import com.pykost.entity.BookEntity;
@@ -11,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BookMapperTest {
     private BookMapper bookMapper;
     private AuthorEntity author;
+    private AuthorForBookDTO authorForBookDTO;
     private BookEntity book;
     private BookDTO bookDTO;
 
@@ -26,11 +28,16 @@ class BookMapperTest {
         book.setDescription("Description");
         book.setAuthor(author);
 
+        authorForBookDTO = new AuthorForBookDTO();
+        authorForBookDTO.setId(1L);
+        authorForBookDTO.setName("Author");
+
+
         bookDTO = new BookDTO();
         bookDTO.setId(1L);
         bookDTO.setName("Book");
         bookDTO.setDescription("Description");
-        bookDTO.setAuthorId(author.getId());
+        bookDTO.setAuthor(authorForBookDTO);
     }
 
     @Test
@@ -39,7 +46,7 @@ class BookMapperTest {
         assertThat(bookDTO.getId()).isEqualTo(expected.getId());
         assertThat(bookDTO.getName()).isEqualTo(expected.getName());
         assertThat(bookDTO.getDescription()).isEqualTo(expected.getDescription());
-        assertThat(bookDTO.getAuthorId()).isEqualTo(expected.getAuthorId());
+        assertThat(bookDTO.getAuthor()).isEqualTo(expected.getAuthor());
     }
 
     @Test
@@ -48,7 +55,7 @@ class BookMapperTest {
         assertThat(book.getId()).isEqualTo(expected.getId());
         assertThat(book.getName()).isEqualTo(expected.getName());
         assertThat(book.getDescription()).isEqualTo(expected.getDescription());
-        assertThat(book.getAuthor().getId()).isEqualTo(expected.getAuthor().getId());
+        assertThat(book.getAuthor()).isEqualTo(expected.getAuthor());
 
     }
 }

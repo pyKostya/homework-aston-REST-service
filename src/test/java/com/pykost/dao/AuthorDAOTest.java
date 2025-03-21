@@ -63,12 +63,12 @@ class AuthorDAOTest {
 
     @Test
     void save() {
-        AuthorEntity authorEntity = new AuthorEntity();
-        authorEntity.setName("Author3");
-        AuthorEntity expected = authorDAO.save(authorEntity);
+        AuthorEntity author = new AuthorEntity();
+        author.setName("Author3");
+        AuthorEntity expected = authorDAO.save(author);
 
         assertThat(expected.getId()).isEqualTo(3L);
-        assertThat(expected.getName()).isEqualTo(authorEntity.getName());
+        assertThat(expected.getName()).isEqualTo(author.getName());
 
         List<AuthorEntity> listActual = authorDAO.findAll();
         assertThat(listActual).hasSize(3);
@@ -76,8 +76,8 @@ class AuthorDAOTest {
 
     @Test
     void update() {
-        AuthorEntity authorEntity = new AuthorEntity(1L, "Author111");
-        boolean expected = authorDAO.update(authorEntity);
+        AuthorEntity author = new AuthorEntity(1L, "Author111");
+        boolean expected = authorDAO.update(author);
         assertThat(expected).isTrue();
 
         Optional<AuthorEntity> author1 = authorDAO.findById(1L);

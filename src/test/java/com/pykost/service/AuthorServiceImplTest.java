@@ -92,10 +92,10 @@ class AuthorServiceImplTest {
 
     @Test
     void getAllAuthors() {
-        List<AuthorEntity> authorEntityList = List.of(author);
+        List<AuthorEntity> authorList = List.of(author);
         List<AuthorDTO> authorDTOList = List.of(authorDTO);
 
-        doReturn(authorEntityList).when(authorDAO).findAll();
+        doReturn(authorList).when(authorDAO).findAll();
         doReturn(authorDTO).when(authorMapper).toDTO(author);
 
         List<AuthorDTO> allAuthors = authorService.getAll();

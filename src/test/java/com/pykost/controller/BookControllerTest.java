@@ -92,7 +92,7 @@ class BookControllerTest {
             assertThat(responseBook.getId()).isEqualTo(bookDTO.getId());
             assertThat(responseBook.getName()).isEqualTo(bookDTO.getName());
             assertThat(responseBook.getDescription()).isEqualTo(bookDTO.getDescription());
-            assertThat(responseBook.getAuthorId()).isEqualTo(bookDTO.getAuthorId());
+            assertThat(responseBook.getAuthor()).isEqualTo(bookDTO.getAuthor());
         }
 
         @Test
@@ -141,7 +141,7 @@ class BookControllerTest {
         assertThat(responseBook.getId()).isEqualTo(bookDTO.getId());
         assertThat(responseBook.getName()).isEqualTo(bookDTO.getName());
         assertThat(responseBook.getDescription()).isEqualTo(bookDTO.getDescription());
-        assertThat(responseBook.getAuthorId()).isEqualTo(bookDTO.getAuthorId());
+        assertThat(responseBook.getAuthor()).isEqualTo(bookDTO.getAuthor());
     }
 
     @Nested

@@ -1,6 +1,7 @@
 package com.pykost.service;
 
 import com.pykost.dao.BookDAO;
+import com.pykost.dto.AuthorForBookDTO;
 import com.pykost.dto.BookDTO;
 import com.pykost.entity.AuthorEntity;
 import com.pykost.entity.BookEntity;
@@ -28,6 +29,7 @@ class BookServiceImplTest {
     @InjectMocks
     private BookServiceImpl bookService;
     private AuthorEntity author;
+    private AuthorForBookDTO authorForBookDTO;
     private BookEntity book;
     private BookDTO bookDTO;
 
@@ -41,11 +43,15 @@ class BookServiceImplTest {
         book.setDescription("Description");
         book.setAuthor(author);
 
+        authorForBookDTO = new AuthorForBookDTO();
+        authorForBookDTO.setId(1L);
+        authorForBookDTO.setName("Book");
+
         bookDTO = new BookDTO();
         bookDTO.setId(1L);
         bookDTO.setName("Book");
         bookDTO.setDescription("Description");
-        bookDTO.setAuthorId(author.getId());
+        bookDTO.setAuthor(authorForBookDTO);
     }
 
     @Test
@@ -60,7 +66,7 @@ class BookServiceImplTest {
         assertThat(bookDTO.getId()).isEqualTo(expected.getId());
         assertThat(bookDTO.getName()).isEqualTo(expected.getName());
         assertThat(bookDTO.getDescription()).isEqualTo(expected.getDescription());
-        assertThat(bookDTO.getAuthorId()).isEqualTo(expected.getAuthorId());
+        assertThat(bookDTO.getAuthor()).isEqualTo(expected.getAuthor());
 
         verify(bookMapper, times(1)).toEntity(bookDTO);
         verify(bookDAO, times(1)).save(book);
@@ -78,7 +84,7 @@ class BookServiceImplTest {
         assertThat(expected.get().getId()).isEqualTo(bookDTO.getId());
         assertThat(expected.get().getName()).isEqualTo(bookDTO.getName());
         assertThat(expected.get().getDescription()).isEqualTo(bookDTO.getDescription());
-        assertThat(expected.get().getAuthorId()).isEqualTo(bookDTO.getAuthorId());
+        assertThat(expected.get().getAuthor()).isEqualTo(bookDTO.getAuthor());
 
         verify(bookDAO, times(1)).findById(book.getId());
         verify(bookMapper, times(1)).toDTO(book);

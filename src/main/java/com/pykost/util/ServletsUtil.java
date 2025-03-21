@@ -14,12 +14,13 @@ public class ServletsUtil {
     }
 
     public static String takeBody(HttpServletRequest req) throws IOException {
-        BufferedReader reader = req.getReader();
-        int intValueOfChar;
-        StringBuilder result = new StringBuilder();
-        while ((intValueOfChar = reader.read()) != -1) {
-            result.append((char) intValueOfChar);
+        try (BufferedReader reader = req.getReader()) {
+            int intValueOfChar;
+            StringBuilder result = new StringBuilder();
+            while ((intValueOfChar = reader.read()) != -1) {
+                result.append((char) intValueOfChar);
+            }
+            return result.toString();
         }
-        return result.toString();
     }
 }

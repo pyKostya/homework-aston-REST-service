@@ -52,17 +52,4 @@ public class BookDTO {
     public int hashCode() {
         return Objects.hash(id, name, description, author);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BookDTO bookDTO = (BookDTO) o;
-        return Objects.equals(id, bookDTO.id) && Objects.equals(name, bookDTO.name) && Objects.equals(description, bookDTO.description) && Objects.equals(authorId, bookDTO.authorId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, description, authorId);
-    }
 }

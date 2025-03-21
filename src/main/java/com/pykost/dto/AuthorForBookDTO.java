@@ -34,12 +34,4 @@ public class AuthorForBookDTO {
     public int hashCode() {
         return Objects.hash(id, name);
     }
-
-    @Override
-    public String toString() {
-        return "AuthorForBookDTO{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               '}';
-    }
 }
